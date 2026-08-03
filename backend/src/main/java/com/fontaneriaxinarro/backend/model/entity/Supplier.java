@@ -1,6 +1,5 @@
 package com.fontaneriaxinarro.backend.model.entity;
 
-import com.fontaneriaxinarro.backend.model.enums.IvaType;
 import com.fontaneriaxinarro.backend.model.enums.PaymentOption;
 import com.fontaneriaxinarro.backend.model.enums.Province;
 
