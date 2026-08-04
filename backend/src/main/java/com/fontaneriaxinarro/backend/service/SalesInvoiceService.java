@@ -5,11 +5,13 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.fontaneriaxinarro.backend.model.dto.CreateInvoiceLineRequestDTO;
 import com.fontaneriaxinarro.backend.model.dto.CreateSalesInvoiceRequestDTO;
 import com.fontaneriaxinarro.backend.model.dto.SalesInvoiceDTO;
-import com.fontaneriaxinarro.backend.model.dto.SalesInvoiceLineDTO;
-import com.fontaneriaxinarro.backend.model.dto.SalesInvoicePaymentDTO;
+import com.fontaneriaxinarro.backend.model.dto.InvoiceLineDTO;
+import com.fontaneriaxinarro.backend.model.dto.InvoicePaymentDTO;
 import com.fontaneriaxinarro.backend.model.entity.Customer;
 import com.fontaneriaxinarro.backend.model.entity.Item;
 import com.fontaneriaxinarro.backend.model.entity.SalesInvoice;
@@ -22,6 +24,7 @@ import com.fontaneriaxinarro.backend.repository.ISalesInvoiceRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
 public class SalesInvoiceService {
 
     private final ISalesInvoiceRepository salesInvoiceRepository;
@@ -105,11 +108,11 @@ public class SalesInvoiceService {
     
     
     private SalesInvoiceDTO convertToDTO(SalesInvoice salesInvoice) {
-        List<SalesInvoiceLineDTO> lineDTOs = salesInvoice.getLines().stream()
+        List<InvoiceLineDTO> lineDTOs = salesInvoice.getLines().stream()
                 .map(this::convertLineToDTO)
                 .toList();
         
-        List<SalesInvoicePaymentDTO> paymentDTOs = salesInvoice.getPayments().stream()
+        List<InvoicePaymentDTO> paymentDTOs = salesInvoice.getPayments().stream()
                 .map(this::convertPaymentToDTO)
                 .toList();
 
@@ -133,8 +136,8 @@ public class SalesInvoiceService {
         );
     }
 
-    private SalesInvoiceLineDTO convertLineToDTO(SalesInvoiceLine line) {
-        return new SalesInvoiceLineDTO(
+    private InvoiceLineDTO convertLineToDTO(SalesInvoiceLine line) {
+        return new InvoiceLineDTO(
             line.getId(),
             line.getItem() != null ? line.getItem().getId() : null,
             line.getItem() != null ? line.getItem().getName() : null,
@@ -146,8 +149,8 @@ public class SalesInvoiceService {
         );
     }
 
-    private SalesInvoicePaymentDTO convertPaymentToDTO(SalesInvoicePayment payment) {
-        return new SalesInvoicePaymentDTO(
+    private InvoicePaymentDTO convertPaymentToDTO(SalesInvoicePayment payment) {
+        return new InvoicePaymentDTO(
             payment.getId(),
             payment.getDueDate(),
             payment.getAmount(),

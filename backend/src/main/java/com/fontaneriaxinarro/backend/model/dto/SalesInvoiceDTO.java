@@ -21,6 +21,6 @@ public record SalesInvoiceDTO(
     String notes,
     Long customerId,
     String customerName,
-    List<SalesInvoiceLineDTO> lines,
-    List<SalesInvoicePaymentDTO> payments
+    List<InvoiceLineDTO> lines,
+    List<InvoicePaymentDTO> payments
 ) {}

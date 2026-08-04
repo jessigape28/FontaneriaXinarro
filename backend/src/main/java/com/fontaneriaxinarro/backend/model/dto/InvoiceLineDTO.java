@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import com.fontaneriaxinarro.backend.model.enums.IvaType;
 
-public record SalesInvoiceLineDTO(
+public record InvoiceLineDTO(
     Long id,
     Long idItem,
     String itemName,

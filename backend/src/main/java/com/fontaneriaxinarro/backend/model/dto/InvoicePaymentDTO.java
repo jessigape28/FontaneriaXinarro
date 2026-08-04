@@ -3,7 +3,7 @@ package com.fontaneriaxinarro.backend.model.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record SalesInvoicePaymentDTO(
+public record InvoicePaymentDTO(
     Long id,
     LocalDate dueDate,
     BigDecimal amount,
