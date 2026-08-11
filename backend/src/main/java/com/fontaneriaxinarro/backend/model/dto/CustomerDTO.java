@@ -18,7 +18,9 @@ public record CustomerDTO(
     String bankAccount,
     Long propertyAdministratorId,
     String propertyAdministratorName,
-    List<AddressDTO> addresses
+    List<AddressDTO> addresses,
+    Long createdById,
+    String createdByUsername
 ) {}
 
 

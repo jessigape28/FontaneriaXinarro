@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fontaneriaxinarro.backend.exception.ResourceNotFoundException;
 import com.fontaneriaxinarro.backend.model.dto.ItemDTO;
 import com.fontaneriaxinarro.backend.model.entity.Item;
 import com.fontaneriaxinarro.backend.repository.IItemRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ItemService {
@@ -27,7 +27,7 @@ public class ItemService {
 
     public ItemDTO findById(Long id) {
         Item item = itemRepository.findById(id).orElseThrow(
-            () -> new EntityNotFoundException("Item not found: " + id));
+            () -> new ResourceNotFoundException("Item not found: " + id));
         
         return convertToDTO(item);
     }
@@ -50,7 +50,7 @@ public class ItemService {
 
             return true;
         } else {
-            throw new EntityNotFoundException("Item not found: " + id);
+            throw new ResourceNotFoundException("Item not found: " + id);
         }
     }
 

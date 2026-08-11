@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fontaneriaxinarro.backend.exception.ResourceNotFoundException;
 import com.fontaneriaxinarro.backend.model.dto.PropertyAdministratorDTO;
 import com.fontaneriaxinarro.backend.model.entity.PropertyAdministrator;
 import com.fontaneriaxinarro.backend.repository.IPropertyAdministratorRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class PropertyAdministratorService {
@@ -27,7 +27,7 @@ public class PropertyAdministratorService {
 
     public PropertyAdministratorDTO findById(Long id) {
         PropertyAdministrator propertyAdministrator = propertyAdministratorRepository.findById(id).orElseThrow(
-            () -> new EntityNotFoundException("PropertyAdministrator not found: " + id));
+            () -> new ResourceNotFoundException("PropertyAdministrator not found: " + id));
 
             return convertToDTO(propertyAdministrator);
     }
@@ -50,7 +50,7 @@ public class PropertyAdministratorService {
 
             return true;
         } else {
-            throw new EntityNotFoundException("PropertyAdministrator not found: " + id);
+            throw new ResourceNotFoundException("PropertyAdministrator not found: " + id);
         }
     }
 

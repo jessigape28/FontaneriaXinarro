@@ -5,19 +5,24 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fontaneriaxinarro.backend.exception.ResourceNotFoundException;
 import com.fontaneriaxinarro.backend.model.dto.SupplierDTO;
 import com.fontaneriaxinarro.backend.model.entity.Supplier;
 import com.fontaneriaxinarro.backend.repository.ISupplierRepository;
+import com.fontaneriaxinarro.backend.security.CurrentUserProvider;
 
-import jakarta.persistence.EntityNotFoundException;
+
+
 
 @Service
 public class SupplierService {
 
     private final ISupplierRepository supplierRepository;
+    private final CurrentUserProvider currentUserProvider;
 
-    public SupplierService(ISupplierRepository supplierRepository) {
+    public SupplierService(ISupplierRepository supplierRepository, CurrentUserProvider currentUserProvider) {
         this.supplierRepository = supplierRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     public List<SupplierDTO> findAll() {
@@ -28,7 +33,7 @@ public class SupplierService {
 
     public SupplierDTO findById(Long id) {
         Supplier supplier = supplierRepository.findById(id).orElseThrow(
-            () -> new EntityNotFoundException("Supplier not found: " + id));
+            () -> new ResourceNotFoundException("Supplier not found: " + id));
         
         return convertToDTO(supplier);
     }
@@ -42,6 +47,8 @@ public class SupplierService {
         supplier.setProvince(supplierDTO.province());
         supplier.setPaymentOption(supplierDTO.paymentOption());
 
+        supplier.setCreatedBy(currentUserProvider.getCurrentUser());
+        
         Supplier savedSupplier = supplierRepository.save(supplier);
 
         return convertToDTO(savedSupplier);
@@ -53,7 +60,7 @@ public class SupplierService {
 
             return true;
         } else {
-            throw new EntityNotFoundException("Supplier not found: " + id);
+            throw new ResourceNotFoundException("Supplier not found: " + id);
         }
     }
 
@@ -65,7 +72,9 @@ public class SupplierService {
             supplier.getAddress(),
             supplier.getPostalCode(),
             supplier.getProvince(),
-            supplier.getPaymentOption()
+            supplier.getPaymentOption(),
+            supplier.getCreatedBy().getId(),
+            supplier.getCreatedBy().getUsername()
         );
     }
 

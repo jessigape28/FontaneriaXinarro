@@ -10,5 +10,7 @@ public record SupplierDTO(
     String address,
     String postalCode,
     Province province,
-    PaymentOption paymentOption
+    PaymentOption paymentOption,
+    Long createdById,
+    String createdByUsername
 ) {}

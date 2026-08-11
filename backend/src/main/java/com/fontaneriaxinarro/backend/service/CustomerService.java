@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fontaneriaxinarro.backend.exception.ResourceNotFoundException;
 import com.fontaneriaxinarro.backend.model.dto.AddressDTO;
 import com.fontaneriaxinarro.backend.model.dto.CustomerDTO;
 import com.fontaneriaxinarro.backend.model.entity.Address;
@@ -11,19 +12,21 @@ import com.fontaneriaxinarro.backend.model.entity.Customer;
 import com.fontaneriaxinarro.backend.model.entity.PropertyAdministrator;
 import com.fontaneriaxinarro.backend.repository.ICustomerRepository;
 import com.fontaneriaxinarro.backend.repository.IPropertyAdministratorRepository;
+import com.fontaneriaxinarro.backend.security.CurrentUserProvider;
 
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class CustomerService {
 
+    private final CurrentUserProvider currentUserProvider;
     private final ICustomerRepository customerRepository;
     private final IPropertyAdministratorRepository propertyAdministratorRepository;
 
-    public CustomerService(ICustomerRepository customerRepository, IPropertyAdministratorRepository propertyAdministratorRepository)
+    public CustomerService(ICustomerRepository customerRepository, IPropertyAdministratorRepository propertyAdministratorRepository, CurrentUserProvider currentUserProvider)
     {
         this.customerRepository = customerRepository;
         this.propertyAdministratorRepository = propertyAdministratorRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     public List<CustomerDTO> findAll() {
@@ -34,7 +37,7 @@ public class CustomerService {
 
     public CustomerDTO findById(Long id) {
         Customer customer = customerRepository.findById(id).orElseThrow(
-            () -> new EntityNotFoundException("Customer not found: " + id));
+            () -> new ResourceNotFoundException("Customer not found: " + id));
 
         return convertToDTO(customer);    
     }
@@ -53,11 +56,13 @@ public class CustomerService {
 
         if (customerDTO.propertyAdministratorId() != null) {
             PropertyAdministrator propertyAdministrator = propertyAdministratorRepository.findById(customerDTO.propertyAdministratorId())
-                .orElseThrow(() -> new EntityNotFoundException("Property Administrator not found: " + customerDTO.propertyAdministratorId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Property Administrator not found: " + customerDTO.propertyAdministratorId()));
 
             customer.setPropertyAdministrator(propertyAdministrator);
         }
     
+        customer.setCreatedBy(currentUserProvider.getCurrentUser());
+
         Customer savedCustomer = customerRepository.save(customer);
 
         return convertToDTO(savedCustomer);
@@ -69,7 +74,7 @@ public class CustomerService {
 
             return true;
         } else {
-            throw new EntityNotFoundException("Customer not foudnd: " + id);
+            throw new ResourceNotFoundException("Customer not found: " + id);
         }
     }
 
@@ -93,7 +98,9 @@ public class CustomerService {
             customer.getBankAccount(),
             propertyAdministrator != null ? propertyAdministrator.getId() : null,
             propertyAdministrator != null ? propertyAdministrator.getName() : null,
-            addressDTOs
+            addressDTOs,
+            customer.getCreatedBy().getId(),
+            customer.getCreatedBy().getUsername()
         );
     }
 

@@ -7,9 +7,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fontaneriaxinarro.backend.exception.ResourceNotFoundException;
 import com.fontaneriaxinarro.backend.model.dto.CreateInvoiceLineRequestDTO;
 import com.fontaneriaxinarro.backend.model.dto.CreateSalesInvoiceRequestDTO;
 import com.fontaneriaxinarro.backend.model.dto.SalesInvoiceDTO;
+import com.fontaneriaxinarro.backend.model.dto.SalesInvoiceSummaryDTO;
 import com.fontaneriaxinarro.backend.model.dto.InvoiceLineDTO;
 import com.fontaneriaxinarro.backend.model.dto.InvoicePaymentDTO;
 import com.fontaneriaxinarro.backend.model.entity.Customer;
@@ -21,8 +23,10 @@ import com.fontaneriaxinarro.backend.model.enums.InvoiceStatus;
 import com.fontaneriaxinarro.backend.repository.ICustomerRepository;
 import com.fontaneriaxinarro.backend.repository.IItemRepository;
 import com.fontaneriaxinarro.backend.repository.ISalesInvoiceRepository;
+import com.fontaneriaxinarro.backend.security.CurrentUserProvider;
 
-import jakarta.persistence.EntityNotFoundException;
+
+
 
 @Service
 public class SalesInvoiceService {
@@ -30,25 +34,28 @@ public class SalesInvoiceService {
     private final ISalesInvoiceRepository salesInvoiceRepository;
     private final ICustomerRepository customerRepository;
     private final IItemRepository itemRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     public SalesInvoiceService(ISalesInvoiceRepository salesInvoiceRepository,
                                 ICustomerRepository customerRepository,
-                                IItemRepository itemRepository) {
+                                IItemRepository itemRepository,
+                                CurrentUserProvider currentUserProvider) {
         
         this.salesInvoiceRepository = salesInvoiceRepository;
         this.customerRepository = customerRepository;
         this.itemRepository = itemRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
-    public List<SalesInvoiceDTO> findAll() {
+    public List<SalesInvoiceSummaryDTO> findAll() {
         return salesInvoiceRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(this::convertToSummaryDTO)
                 .toList();
     }
 
     public SalesInvoiceDTO findById(Long id) {
         SalesInvoice salesInvoice = salesInvoiceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("SalesInvoice not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("SalesInvoice not found: " + id));
 
             return convertToDTO(salesInvoice);    
     }
@@ -56,7 +63,7 @@ public class SalesInvoiceService {
     public SalesInvoiceDTO createDraft(CreateSalesInvoiceRequestDTO request) {
 
         Customer customer = customerRepository.findById(request.customerId())
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found: " + request.customerId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + request.customerId()));
 
         SalesInvoice salesInvoice = new SalesInvoice();
         salesInvoice.setCustomer(customer);
@@ -70,7 +77,7 @@ public class SalesInvoiceService {
 
         for (CreateInvoiceLineRequestDTO lineRequest : request.invoiceLines()) {
             Item item = itemRepository.findById(lineRequest.itemId())
-                    .orElseThrow(() -> new EntityNotFoundException("Item not found: " + lineRequest.itemId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + lineRequest.itemId()));
             
             SalesInvoiceLine line = new SalesInvoiceLine();
             line.setSalesInvoice(salesInvoice);
@@ -101,10 +108,23 @@ public class SalesInvoiceService {
         salesInvoice.setIvaAmount(ivaAmount);
         salesInvoice.setTotal(subtotal.add(ivaAmount));
 
+        salesInvoice.setCreatedBy(currentUserProvider.getCurrentUser());
+
         SalesInvoice savedInvoice = salesInvoiceRepository.save(salesInvoice);
 
         return convertToDTO(savedInvoice);
-    }    
+    }  
+    
+    public void deleteSalesInvoice(Long id) {
+        SalesInvoice salesInvoice = salesInvoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("SalesInvoice not found: " + id));
+
+        if (salesInvoice.getStatus() != InvoiceStatus.DRAFT) {
+            throw new IllegalArgumentException("Only invoices in DRAFT status can be deleted");
+        }
+
+        salesInvoiceRepository.deleteById(id);
+    }
     
     
     private SalesInvoiceDTO convertToDTO(SalesInvoice salesInvoice) {
@@ -130,9 +150,26 @@ public class SalesInvoiceService {
             salesInvoice.getNotes(),
             salesInvoice.getCustomer().getId(),
             salesInvoice.getCustomer().getName(),
+            salesInvoice.getCustomer().getSurname(),
             lineDTOs,
-            paymentDTOs
-            
+            paymentDTOs,
+            salesInvoice.getCreatedBy().getId(),
+            salesInvoice.getCreatedBy().getUsername()
+        );
+    }
+
+    private SalesInvoiceSummaryDTO convertToSummaryDTO(SalesInvoice salesInvoice) {
+        return new SalesInvoiceSummaryDTO(
+            salesInvoice.getId(),
+            salesInvoice.getNumber(),
+            salesInvoice.getIssueDate(),
+            salesInvoice.getTotal(),
+            salesInvoice.getStatus(),
+            salesInvoice.getCustomer().getId(),
+            salesInvoice.getCustomer().getName(),
+            salesInvoice.getCustomer().getSurname(),
+            salesInvoice.getCreatedBy().getId(),
+            salesInvoice.getCreatedBy().getUsername()
         );
     }
 

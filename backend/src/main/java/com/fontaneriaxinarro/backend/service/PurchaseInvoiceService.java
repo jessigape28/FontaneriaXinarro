@@ -1,5 +1,6 @@
 package com.fontaneriaxinarro.backend.service;
 
+import com.fontaneriaxinarro.backend.exception.ResourceNotFoundException;
 import com.fontaneriaxinarro.backend.model.dto.CreateInvoiceLineRequestDTO;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.fontaneriaxinarro.backend.model.dto.CreatePurchaseInvoiceRequestDTO;
 import com.fontaneriaxinarro.backend.model.dto.PurchaseInvoiceDTO;
+import com.fontaneriaxinarro.backend.model.dto.PurchaseInvoiceSummaryDTO;
 import com.fontaneriaxinarro.backend.model.dto.InvoicePaymentDTO;
 import com.fontaneriaxinarro.backend.model.entity.Item;
 import com.fontaneriaxinarro.backend.model.entity.PurchaseInvoice;
@@ -20,8 +22,8 @@ import com.fontaneriaxinarro.backend.model.enums.InvoiceStatus;
 import com.fontaneriaxinarro.backend.repository.IItemRepository;
 import com.fontaneriaxinarro.backend.repository.IPurchaseInvoiceRepository;
 import com.fontaneriaxinarro.backend.repository.ISupplierRepository;
+import com.fontaneriaxinarro.backend.security.CurrentUserProvider;
 
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class PurchaseInvoiceService {
@@ -29,33 +31,36 @@ public class PurchaseInvoiceService {
     private final IPurchaseInvoiceRepository purchaseInvoiceRepository;
     private final ISupplierRepository supplierRepository;
     private final IItemRepository itemRepository;
+    private final CurrentUserProvider currentUserProvider;
     
     public PurchaseInvoiceService(IPurchaseInvoiceRepository purchaseInvoiceRepository,
                                 ISupplierRepository supplierRepository, 
-                                IItemRepository itemRepository) {
+                                IItemRepository itemRepository,
+                                CurrentUserProvider currentUserProvider) {
 
         this.purchaseInvoiceRepository = purchaseInvoiceRepository;
         this.supplierRepository = supplierRepository;
         this.itemRepository = itemRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
-    public List<PurchaseInvoiceDTO> findAll() {
+    public List<PurchaseInvoiceSummaryDTO> findAll() {
         return purchaseInvoiceRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(this::convertToSummaryDTO)
                 .toList();
     }
 
     public PurchaseInvoiceDTO findById(Long id) {
         PurchaseInvoice purchaseInvoice = purchaseInvoiceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("PurchaseInvoice not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("PurchaseInvoice not found: " + id));
 
             return convertToDTO(purchaseInvoice);        
     }
 
-    public PurchaseInvoiceDTO create(CreatePurchaseInvoiceRequestDTO request) {
+    public PurchaseInvoiceDTO createPurchaseInvoice(CreatePurchaseInvoiceRequestDTO request) {
 
         Supplier supplier = supplierRepository.findById(request.supplierId())
-                    .orElseThrow(() -> new EntityNotFoundException("Supplier not found: " + request.supplierId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier not found: " + request.supplierId()));
         
         PurchaseInvoice purchaseInvoice = new PurchaseInvoice();
         purchaseInvoice.setSupplier(supplier);
@@ -71,7 +76,7 @@ public class PurchaseInvoiceService {
 
         for (CreateInvoiceLineRequestDTO lineRequest : request.lines()) {
             Item item = itemRepository.findById(lineRequest.itemId())
-                    .orElseThrow(() -> new EntityNotFoundException("Item not found: " + lineRequest.itemId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + lineRequest.itemId()));
 
             PurchaseInvoiceLine line = new PurchaseInvoiceLine();
             line.setPurchaseInvoice(purchaseInvoice);
@@ -103,10 +108,23 @@ public class PurchaseInvoiceService {
         purchaseInvoice.setIvaAmount(ivaAmount);
         purchaseInvoice.setTotal(subtotal.add(ivaAmount));
 
+        purchaseInvoice.setCreatedBy(currentUserProvider.getCurrentUser());
+
         PurchaseInvoice savedInvoice = purchaseInvoiceRepository.save(purchaseInvoice);
 
         return convertToDTO(savedInvoice);
 
+    }
+
+    public void deletePurchaseInvoice(Long id) {
+        PurchaseInvoice purchaseInvoice = purchaseInvoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PurchaseInvoice not found: " + id));
+
+        if (purchaseInvoice.getStatus() == InvoiceStatus.PAID) {
+            throw new IllegalArgumentException("Cannot delete a paid invoice");
+        }
+
+        purchaseInvoiceRepository.deleteById(id);
     }
 
     
@@ -130,7 +148,23 @@ public class PurchaseInvoiceService {
             purchaseInvoice.getNotes(),
             purchaseInvoice.getSupplier().getId(),
             purchaseInvoice.getSupplier().getName(),
-            paymentsDTOs
+            paymentsDTOs,
+            purchaseInvoice.getCreatedBy().getId(),
+            purchaseInvoice.getCreatedBy().getUsername()
+        );
+    }
+
+    private PurchaseInvoiceSummaryDTO convertToSummaryDTO(PurchaseInvoice purchaseInvoice) {
+        return new PurchaseInvoiceSummaryDTO(
+            purchaseInvoice.getId(),
+            purchaseInvoice.getNumber(),
+            purchaseInvoice.getIssueDate(),
+            purchaseInvoice.getTotal(),
+            purchaseInvoice.getStatus(),
+            purchaseInvoice.getSupplier().getId(),
+            purchaseInvoice.getSupplier().getName(),
+            purchaseInvoice.getCreatedBy().getId(),
+            purchaseInvoice.getCreatedBy().getUsername()
         );
     }
 

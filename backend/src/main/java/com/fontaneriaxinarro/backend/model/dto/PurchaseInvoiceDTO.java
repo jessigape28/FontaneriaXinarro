@@ -21,7 +21,7 @@ public record PurchaseInvoiceDTO(
     String notes,
     Long supplierId,
     String supplierName,
-    List<InvoicePaymentDTO> payments
-) {
-
-}
+    List<InvoicePaymentDTO> payments,
+    Long createdById,
+    String createdByUsername
+) {}
