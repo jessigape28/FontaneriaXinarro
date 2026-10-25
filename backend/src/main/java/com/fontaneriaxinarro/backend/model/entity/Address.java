@@ -32,6 +32,9 @@ public class Address {
     @Column(nullable = false)
     private String street;
 
+    @Column(nullable = false)
+    private String town;
+
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
 

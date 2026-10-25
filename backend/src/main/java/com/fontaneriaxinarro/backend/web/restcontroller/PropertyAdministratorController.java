@@ -16,7 +16,7 @@ import com.fontaneriaxinarro.backend.model.dto.PropertyAdministratorDTO;
 import com.fontaneriaxinarro.backend.service.PropertyAdministratorService;
 
 @RestController
-@RequestMapping("/api/propertyAdministrators")
+@RequestMapping("/api/property-administrators")
 public class PropertyAdministratorController {
 
     private final PropertyAdministratorService propertyAdministratorService;

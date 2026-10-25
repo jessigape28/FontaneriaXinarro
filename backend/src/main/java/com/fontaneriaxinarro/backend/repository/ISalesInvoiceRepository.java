@@ -10,8 +10,7 @@ import java.util.Optional;
 
 import com.fontaneriaxinarro.backend.model.enums.InvoiceStatus;
 
-
-public interface ISalesInvoiceRepository extends JpaRepository <SalesInvoice, Long> {
+public interface ISalesInvoiceRepository extends JpaRepository<SalesInvoice, Long> {
 
     Optional<SalesInvoice> findByNumber(String number);
 
@@ -20,4 +19,6 @@ public interface ISalesInvoiceRepository extends JpaRepository <SalesInvoice, Lo
     List<SalesInvoice> findByStatus(InvoiceStatus status);
 
     List<SalesInvoice> findByIssueDateBetween(LocalDate startDate, LocalDate endDate);
+
+    boolean existsByCustomerId(Long customerId);
 }

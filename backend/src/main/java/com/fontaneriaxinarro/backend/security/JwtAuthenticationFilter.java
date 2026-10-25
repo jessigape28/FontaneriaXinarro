@@ -2,11 +2,13 @@ package com.fontaneriaxinarro.backend.security;
 
 import java.io.IOException;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,34 +20,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
+    private final AuthCookieProvider authCookieProvider;
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil,
+            UserDetailsServiceImpl userDetailsService,
+            AuthCookieProvider authCookieProvider) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.authCookieProvider = authCookieProvider;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-                String authHeader = request.getHeader("Authorization");
+        Cookie cookie = WebUtils.getCookie(request, authCookieProvider.getCookieName());
 
-                if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                    String token = authHeader.substring(7);
+        if (cookie != null) {
+            String token = cookie.getValue();
 
-                    if (jwtUtil.isTokenValid(token)) {
+            if (jwtUtil.isTokenValid(token)) {
 
-                        String username = jwtUtil.extractUsername(token);
-                        UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(username);
-                        
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                String username = jwtUtil.extractUsername(token);
+                UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(username);
 
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
-                }
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                filterChain.doFilter(request, response);
-        
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        }
+
+        filterChain.doFilter(request, response);
     }
-    
 }

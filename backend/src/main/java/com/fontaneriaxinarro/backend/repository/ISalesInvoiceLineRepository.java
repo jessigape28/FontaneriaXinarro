@@ -6,4 +6,5 @@ import com.fontaneriaxinarro.backend.model.entity.SalesInvoiceLine;
 
 public interface ISalesInvoiceLineRepository extends JpaRepository<SalesInvoiceLine, Long>{
 
+    boolean existsByItemId(Long itemId);
 }
