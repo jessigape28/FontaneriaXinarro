@@ -47,9 +47,11 @@ const toForm = (customer) => ({
 
 export default function CustomerFormPage() {
     const navigate = useNavigate();
-    const addCustomer = useCustomerStore((state) => state.addCustomer);
     const { id } = useParams();
     const isEditing = Boolean(id);
+
+    const addCustomer = useCustomerStore((state) => state.addCustomer);
+    const editCustomer = useCustomerStore((state) => state.editCustomer);
 
     const [form, setForm] = useState(initialForm);
     const [administrators, setAdministrators] = useState([]);
@@ -57,7 +59,7 @@ export default function CustomerFormPage() {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(isEditing);
 
-    const editCustomer = useCustomerStore((state) => state.editCustomer);
+    
 
     useEffect(() => {
         getPropertyAdministrators().then(setAdministrators)

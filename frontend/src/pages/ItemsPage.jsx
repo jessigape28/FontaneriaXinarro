@@ -3,9 +3,9 @@ import { useItemStore } from "../store/itemStore";
 import { normalize } from "../utils/text";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "../utils/format";
+import { alertClass } from "../components/uiClasses";
 
 
-const alertClass = 'mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700';
 
 export default function ItemsPage() {
 
@@ -44,7 +44,7 @@ export default function ItemsPage() {
         try {
             await removeItem(item.id);
         } catch (err) {
-            setDeleteError(err.reponse?.data?.message ?? 'No se ha podido borrar el artículo.');
+            setDeleteError(err.response?.data?.message ?? 'No se ha podido borrar el artículo.');
         }
     }
 
