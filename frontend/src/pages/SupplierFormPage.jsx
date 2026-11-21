@@ -103,10 +103,10 @@ export default function SupplierFormPage() {
                         <input id="cif" name="cif" value={form.cif} onChange={handleChange} required className={inputClass}></input>
                     </Field>
                     <Field label="Dirección" htmlFor="address">
-                        <input id="address" name="address" value={form.address} onChange={handleChange} required className={inputClass}></input>
+                        <input id="address" name="address" value={form.address} onChange={handleChange} className={inputClass}></input>
                     </Field>
                     <Field label="Código postal" htmlFor="postalCode">
-                        <input id="postalCode" name="postalCode" value={form.postalCode} onChange={handleChange} required className={inputClass} pattern="\d{5}"></input>
+                        <input id="postalCode" name="postalCode" value={form.postalCode} onChange={handleChange} className={inputClass} pattern="\d{5}"></input>
                     </Field>
                     <Field label="Provincia" htmlFor="province">
                         <select
@@ -114,10 +114,9 @@ export default function SupplierFormPage() {
                             name="province"
                             value={form.province}
                             onChange={handleChange}
-                            required
                             className={inputClass}
                         >
-                            <option value="">-Provincia-</option>
+                            <option value="">— Provincia —</option>
                             {PROVINCES.map((province) => (
                                 <option key={province} value={province}>{formatProvince(province)}</option>
                             ))}
@@ -147,7 +146,7 @@ export default function SupplierFormPage() {
 
             {error && <p role="alert" className={alertClass}>{error}</p>}
 
-            <div className="flex justify-end fap-3">
+            <div className="flex justify-end gap-3">
                 <Link to="/suppliers" className={buttonSecondary}>Cancelar</Link>
                 <button type="submit" disabled={saving} className={buttonPrimary}>
                     {saving ? 'Guardando...' : 'Guardar proveedor'}
