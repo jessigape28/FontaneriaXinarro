@@ -12,6 +12,8 @@ import ItemsPage from './pages/ItemsPage';
 import ItemFormPage from './pages/ItemFormPage';
 import SuppliersPage from './pages/SuppliersPage';
 import SupplierFormPage from './pages/SupplierFormPage';
+import PropertyAdministratorsPage from './pages/PropertyAdministratorsPage';
+import PropertyAdministratorFormPage from './pages/PropertyAdministratorFormPage';
 
 
 function App() {
@@ -50,6 +52,10 @@ function App() {
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/suppliers/new" element={<SupplierFormPage />} />
           <Route path="/suppliers/:id/edit" element={<SupplierFormPage />} />
+
+          <Route path="/property-administrators" element={<PropertyAdministratorsPage />} />
+          <Route path="/property-administrators/new" element={<PropertyAdministratorFormPage />} />
+          <Route path="/property-administrators/:id/edit" element={<PropertyAdministratorFormPage />} />
         </Route>
       </Route>
 

@@ -27,6 +27,7 @@ export default function AppLayout() {
                             <NavLink to="/customers" className={navLinkClass}>Clientes</NavLink>
                             <NavLink to="/items" className={navLinkClass}>Artículos</NavLink>
                             <NavLink to="/suppliers" className={navLinkClass}>Proveedores</NavLink>
+                            <NavLink to="/property-administrators" className={navLinkClass}>Administradores</NavLink>
                         </nav>
                     </div>
 
