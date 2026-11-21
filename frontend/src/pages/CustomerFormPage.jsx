@@ -37,7 +37,7 @@ const toForm = (customer) => ({
     propertyAdministratorName: customer.propertyAdministratorName ? String(customer.propertyAdministratorName) : '',
     addresses: customer.addresses.map((address) => ({
         id: address.id,
-        alias: address.aslias ?? '',
+        alias: address.alias ?? '',
         street: address.street,
         town: address.town,
         postalCode: address.postalCode,
@@ -107,7 +107,7 @@ export default function CustomerFormPage() {
         const payload = {
             name: form.name.trim(),
             surname: toNull(form.surname),
-            dniCif: form.dniCif.trim(),
+            dniCif: form.dniCif.trim().toUpperCase(),
             email: toNull(form.email),
             phone: toNull(form.phone),
             type: form.type,

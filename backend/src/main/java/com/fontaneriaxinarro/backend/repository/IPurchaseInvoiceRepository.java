@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.fontaneriaxinarro.backend.model.entity.PurchaseInvoice;
 import com.fontaneriaxinarro.backend.model.enums.InvoiceStatus;
 
-public interface IPurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice, Long>{
+public interface IPurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice, Long> {
 
     Optional<PurchaseInvoice> findByNumber(String number);
 
@@ -19,4 +19,5 @@ public interface IPurchaseInvoiceRepository extends JpaRepository<PurchaseInvoic
 
     List<PurchaseInvoice> findByIssueDateBetween(LocalDate startDate, LocalDate endDate);
 
+    boolean existsBySupplierId(Long supplierId);
 }

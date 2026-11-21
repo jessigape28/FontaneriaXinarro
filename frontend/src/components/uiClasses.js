@@ -13,3 +13,9 @@ export const buttonSecondary =
 export const alertClass =
     'rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700';
 
+
+export const TYPE_STYLES = {
+    INDIVIDUAL: 'bg-slate-100 text-slate-700',
+    COMPANY: 'bg-blue-50 text-blue-700',
+    COMMUNITY: 'bg-amber-50 text-amber-700',
+};

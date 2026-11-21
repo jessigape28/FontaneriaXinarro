@@ -100,46 +100,11 @@ public class CustomerService {
             throw new ResourceNotFoundException("Customer not found: " + id);
         }
         if (salesInvoiceRepository.existsByCustomerId(id)) {
-            throw new IllegalArgumentException("No se puede borrar un cliente que tiene facturas");
+            throw new IllegalArgumentException("No se puede borrar un cliente que tiene facturas asociadas.");
         }
         customerRepository.deleteById(id);
 
         return true;
-    }
-
-    private CustomerDTO convertToDTO(Customer customer) {
-        List<AddressDTO> addressDTOs = customer.getAddresses().stream()
-                .map(this::convertToAddressDTO)
-                .toList();
-
-        PropertyAdministrator propertyAdministrator = customer.getPropertyAdministrator();
-
-        return new CustomerDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getSurname(),
-                customer.getDniCif(),
-                customer.getEmail(),
-                customer.getPhone(),
-                customer.getType(),
-                customer.getIvaType(),
-                customer.getNotes(),
-                customer.getBankAccount(),
-                propertyAdministrator != null ? propertyAdministrator.getId() : null,
-                propertyAdministrator != null ? propertyAdministrator.getName() : null,
-                addressDTOs,
-                customer.getCreatedBy().getId(),
-                customer.getCreatedBy().getUsername());
-    }
-
-    private AddressDTO convertToAddressDTO(Address address) {
-        return new AddressDTO(
-                address.getId(),
-                address.getAlias(),
-                address.getStreet(),
-                address.getTown(),
-                address.getPostalCode(),
-                address.getProvince());
     }
 
     @Transactional
@@ -177,6 +142,41 @@ public class CustomerService {
         syncAddresses(customer, customerDTO.addresses());
 
         return convertToDTO(customerRepository.save(customer));
+    }
+
+    private CustomerDTO convertToDTO(Customer customer) {
+        List<AddressDTO> addressDTOs = customer.getAddresses().stream()
+                .map(this::convertToAddressDTO)
+                .toList();
+
+        PropertyAdministrator propertyAdministrator = customer.getPropertyAdministrator();
+
+        return new CustomerDTO(
+                customer.getId(),
+                customer.getName(),
+                customer.getSurname(),
+                customer.getDniCif(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.getType(),
+                customer.getIvaType(),
+                customer.getNotes(),
+                customer.getBankAccount(),
+                propertyAdministrator != null ? propertyAdministrator.getId() : null,
+                propertyAdministrator != null ? propertyAdministrator.getName() : null,
+                addressDTOs,
+                customer.getCreatedBy().getId(),
+                customer.getCreatedBy().getUsername());
+    }
+
+    private AddressDTO convertToAddressDTO(Address address) {
+        return new AddressDTO(
+                address.getId(),
+                address.getAlias(),
+                address.getStreet(),
+                address.getTown(),
+                address.getPostalCode(),
+                address.getProvince());
     }
 
     private void syncAddresses(Customer customer, List<AddressDTO> addressDTOs) {

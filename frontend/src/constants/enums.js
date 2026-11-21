@@ -21,6 +21,23 @@ export const PROVINCES = [
   'ZAMORA', 'ZARAGOZA', 'CEUTA', 'MELILLA',
 ];
 
+export const PAYMENT_OPTION_LABELS = {
+    TRANSFER: 'Transferencia',
+    BIZUM: 'Bizum',
+    DIRECT_DEBIT: 'Domiciliación bancaria',
+    CASH: 'Efectivo'
+}
+
+export const TYPE_LABELS = {
+    INDIVIDUAL: 'Particular',
+    COMPANY: 'Empresa',
+    COMMUNITY: 'Comunidad',
+}
+
+export const PAYMENT_OPTIONS = Object.entries(PAYMENT_OPTION_LABELS).map(
+    ([value, label]) => ({ value, label })
+);
+
 export const formatProvince = (code) => 
     code
         .split('_')

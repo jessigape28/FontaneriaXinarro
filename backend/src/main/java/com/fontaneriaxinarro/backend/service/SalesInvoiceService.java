@@ -25,9 +25,6 @@ import com.fontaneriaxinarro.backend.repository.IItemRepository;
 import com.fontaneriaxinarro.backend.repository.ISalesInvoiceRepository;
 import com.fontaneriaxinarro.backend.security.CurrentUserProvider;
 
-
-
-
 @Service
 public class SalesInvoiceService {
 
@@ -37,10 +34,10 @@ public class SalesInvoiceService {
     private final CurrentUserProvider currentUserProvider;
 
     public SalesInvoiceService(ISalesInvoiceRepository salesInvoiceRepository,
-                                ICustomerRepository customerRepository,
-                                IItemRepository itemRepository,
-                                CurrentUserProvider currentUserProvider) {
-        
+            ICustomerRepository customerRepository,
+            IItemRepository itemRepository,
+            CurrentUserProvider currentUserProvider) {
+
         this.salesInvoiceRepository = salesInvoiceRepository;
         this.customerRepository = customerRepository;
         this.itemRepository = itemRepository;
@@ -57,7 +54,7 @@ public class SalesInvoiceService {
         SalesInvoice salesInvoice = salesInvoiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SalesInvoice not found: " + id));
 
-            return convertToDTO(salesInvoice);    
+        return convertToDTO(salesInvoice);
     }
 
     public SalesInvoiceDTO createDraft(CreateSalesInvoiceRequestDTO request) {
@@ -78,7 +75,7 @@ public class SalesInvoiceService {
         for (CreateInvoiceLineRequestDTO lineRequest : request.invoiceLines()) {
             Item item = itemRepository.findById(lineRequest.itemId())
                     .orElseThrow(() -> new ResourceNotFoundException("Item not found: " + lineRequest.itemId()));
-            
+
             SalesInvoiceLine line = new SalesInvoiceLine();
             line.setSalesInvoice(salesInvoice);
             line.setItem(item);
@@ -89,19 +86,19 @@ public class SalesInvoiceService {
             line.setIvaType(lineRequest.ivaType());
 
             BigDecimal lineSubtotal = unitPrice
-                .multiply(BigDecimal.valueOf(lineRequest.quantity()))
-                .setScale(2, RoundingMode.HALF_UP);
+                    .multiply(BigDecimal.valueOf(lineRequest.quantity()))
+                    .setScale(2, RoundingMode.HALF_UP);
             line.setSubtotal(lineSubtotal);
 
             salesInvoice.getLines().add(line);
 
             BigDecimal lineIva = lineSubtotal
-                .multiply(lineRequest.ivaType().getPorcentaje())
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                    .multiply(lineRequest.ivaType().getPorcentaje())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
             subtotal = subtotal.add(lineSubtotal);
             ivaAmount = ivaAmount.add(lineIva);
-            
+
         }
 
         salesInvoice.setSubtotal(subtotal);
@@ -113,8 +110,8 @@ public class SalesInvoiceService {
         SalesInvoice savedInvoice = salesInvoiceRepository.save(salesInvoice);
 
         return convertToDTO(savedInvoice);
-    }  
-    
+    }
+
     public void deleteSalesInvoice(Long id) {
         SalesInvoice salesInvoice = salesInvoiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SalesInvoice not found: " + id));
@@ -125,76 +122,71 @@ public class SalesInvoiceService {
 
         salesInvoiceRepository.deleteById(id);
     }
-    
-    
+
     private SalesInvoiceDTO convertToDTO(SalesInvoice salesInvoice) {
         List<InvoiceLineDTO> lineDTOs = salesInvoice.getLines().stream()
                 .map(this::convertLineToDTO)
                 .toList();
-        
+
         List<InvoicePaymentDTO> paymentDTOs = salesInvoice.getPayments().stream()
                 .map(this::convertPaymentToDTO)
                 .toList();
 
         return new SalesInvoiceDTO(
-            salesInvoice.getId(),
-            salesInvoice.getNumber(),
-            salesInvoice.getCreatedAt(),
-            salesInvoice.getIssueDate(),
-            salesInvoice.getInvoiceFilePath(),
-            salesInvoice.getPaymentTerm(),
-            salesInvoice.getSubtotal(),
-            salesInvoice.getIvaAmount(),
-            salesInvoice.getTotal(),
-            salesInvoice.getStatus(),
-            salesInvoice.getNotes(),
-            salesInvoice.getCustomer().getId(),
-            salesInvoice.getCustomer().getName(),
-            salesInvoice.getCustomer().getSurname(),
-            lineDTOs,
-            paymentDTOs,
-            salesInvoice.getCreatedBy().getId(),
-            salesInvoice.getCreatedBy().getUsername()
-        );
+                salesInvoice.getId(),
+                salesInvoice.getNumber(),
+                salesInvoice.getCreatedAt(),
+                salesInvoice.getIssueDate(),
+                salesInvoice.getInvoiceFilePath(),
+                salesInvoice.getPaymentTerm(),
+                salesInvoice.getSubtotal(),
+                salesInvoice.getIvaAmount(),
+                salesInvoice.getTotal(),
+                salesInvoice.getStatus(),
+                salesInvoice.getNotes(),
+                salesInvoice.getCustomer().getId(),
+                salesInvoice.getCustomer().getName(),
+                salesInvoice.getCustomer().getSurname(),
+                lineDTOs,
+                paymentDTOs,
+                salesInvoice.getCreatedBy().getId(),
+                salesInvoice.getCreatedBy().getUsername());
     }
 
     private SalesInvoiceSummaryDTO convertToSummaryDTO(SalesInvoice salesInvoice) {
         return new SalesInvoiceSummaryDTO(
-            salesInvoice.getId(),
-            salesInvoice.getNumber(),
-            salesInvoice.getIssueDate(),
-            salesInvoice.getTotal(),
-            salesInvoice.getStatus(),
-            salesInvoice.getCustomer().getId(),
-            salesInvoice.getCustomer().getName(),
-            salesInvoice.getCustomer().getSurname(),
-            salesInvoice.getCreatedBy().getId(),
-            salesInvoice.getCreatedBy().getUsername()
-        );
+                salesInvoice.getId(),
+                salesInvoice.getNumber(),
+                salesInvoice.getIssueDate(),
+                salesInvoice.getTotal(),
+                salesInvoice.getStatus(),
+                salesInvoice.getCustomer().getId(),
+                salesInvoice.getCustomer().getName(),
+                salesInvoice.getCustomer().getSurname(),
+                salesInvoice.getCreatedBy().getId(),
+                salesInvoice.getCreatedBy().getUsername());
     }
 
     private InvoiceLineDTO convertLineToDTO(SalesInvoiceLine line) {
         return new InvoiceLineDTO(
-            line.getId(),
-            line.getItem() != null ? line.getItem().getId() : null,
-            line.getItem() != null ? line.getItem().getName() : null,
-            line.getDescription(),
-            line.getQuantity(),
-            line.getUnitPrice(),
-            line.getIvaType(),
-            line.getSubtotal()
-        );
+                line.getId(),
+                line.getItem() != null ? line.getItem().getId() : null,
+                line.getItem() != null ? line.getItem().getName() : null,
+                line.getDescription(),
+                line.getQuantity(),
+                line.getUnitPrice(),
+                line.getIvaType(),
+                line.getSubtotal());
     }
 
     private InvoicePaymentDTO convertPaymentToDTO(SalesInvoicePayment payment) {
         return new InvoicePaymentDTO(
-            payment.getId(),
-            payment.getDueDate(),
-            payment.getAmount(),
-            payment.isPaid(),
-            payment.getPaymentDate(),
-            payment.getReceiptFilePath()
-        );
+                payment.getId(),
+                payment.getDueDate(),
+                payment.getAmount(),
+                payment.isPaid(),
+                payment.getPaymentDate(),
+                payment.getReceiptFilePath());
     }
-    
+
 }

@@ -10,6 +10,8 @@ import CustomersPage from './pages/CustomersPage';
 import CustomerFormPage from './pages/CustomerFormPage';
 import ItemsPage from './pages/ItemsPage';
 import ItemFormPage from './pages/ItemFormPage';
+import SuppliersPage from './pages/SuppliersPage';
+import SupplierFormPage from './pages/SupplierFormPage';
 
 
 function App() {
@@ -44,6 +46,10 @@ function App() {
           <Route path="/items" element={<ItemsPage />} />
           <Route path="/items/new" element={<ItemFormPage />} />
           <Route path="/items/:id/edit" element={<ItemFormPage />} />
+
+          <Route path="/suppliers" element={<SuppliersPage />} />
+          <Route path="/suppliers/new" element={<SupplierFormPage />} />
+          <Route path="/suppliers/:id/edit" element={<SupplierFormPage />} />
         </Route>
       </Route>
 

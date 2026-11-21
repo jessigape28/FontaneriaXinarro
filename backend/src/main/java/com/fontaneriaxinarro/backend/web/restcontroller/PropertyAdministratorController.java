@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fontaneriaxinarro.backend.model.dto.PropertyAdministratorDTO;
 import com.fontaneriaxinarro.backend.service.PropertyAdministratorService;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/property-administrators")
@@ -30,23 +31,31 @@ public class PropertyAdministratorController {
         return propertyAdministratorService.findAll();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public PropertyAdministratorDTO findById(@PathVariable Long id) {
         return propertyAdministratorService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<PropertyAdministratorDTO> createPropertyAdministrator(@RequestBody PropertyAdministratorDTO propertyAdministratorDTO) {
-        PropertyAdministratorDTO createdPropertyAdministrator = propertyAdministratorService.createPropertyAdministrator(propertyAdministratorDTO);
+    public ResponseEntity<PropertyAdministratorDTO> createPropertyAdministrator(
+            @RequestBody PropertyAdministratorDTO propertyAdministratorDTO) {
+        PropertyAdministratorDTO createdPropertyAdministrator = propertyAdministratorService
+                .createPropertyAdministrator(propertyAdministratorDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPropertyAdministrator);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePropertyAdministrator(@PathVariable Long id) {
         propertyAdministratorService.deletePropertyAdministrator(id);
 
         return ResponseEntity.noContent().build();
     }
-    
+
+    @PutMapping("/{id}")
+    public PropertyAdministratorDTO updatePropertyAdministrator(@PathVariable Long id,
+            @RequestBody PropertyAdministratorDTO propertyAdministratorDTO) {
+        return propertyAdministratorService.updatePropertyAdministrator(id, propertyAdministratorDTO);
+    }
+
 }
